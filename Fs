@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>fsociety</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: #000; color: #0f0; height: 100vh; overflow: hidden;
+    font-family: 'Courier New', monospace; user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #intro {
+    position: fixed; inset: 0; z-index: 5;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: #000; text-align: center; padding: 20px;
+  }
+  #intro .glitch-title {
+    font-size: 46px; letter-spacing: 8px;
+    color: #fff; font-weight: bold;
+    text-shadow: 2px 0 #ff0033, -2px 0 #00ffee;
+    animation: glitch 0.4s infinite;
+  }
+  #intro .sub    { margin-top: 16px; color: #ff0033; font-size: 14px; letter-spacing: 4px; opacity: 0; animation: fadeIn 1.2s ease-in 0.8s forwards; }
+  #intro .sub-es { margin-top: 6px;  color: #884444; font-size: 12px; letter-spacing: 3px; opacity: 0; animation: fadeIn 1.2s ease-in 1.1s forwards; }
+  #intro .hello    { margin-top: 34px; color: #0f0; font-size: 20px; letter-spacing: 2px; opacity: 0; animation: fadeIn 1s ease-in 2s forwards; }
+  #intro .hello-es { margin-top: 6px;  color: #0a5a0a; font-size: 13px; opacity: 0; animation: fadeIn 1s ease-in 2.3s forwards; }
+  @keyframes glitch {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(-3px, 2px); }
+    40% { transform: translate(3px, -2px); }
+    60% { transform: translate(-2px, -3px); }
+    80% { transform: translate(2px, 3px); }
+  }
+  @keyframes fadeIn { to { opacity: 1; } }
+  .scanlines {
+    position: fixed; inset: 0; pointer-events: none; z-index: 6;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0.25) 0px, rgba(0,0,0,0.25) 1px, transparent 1px, transparent 3px);
+    mix-blend-mode: overlay;
+  }
+  #terminal {
+    position: fixed; inset: 0; padding: 14px; overflow: hidden;
+    font-size: 14px; line-height: 1.35;
+    white-space: pre-wrap; word-break: break-word;
+    display: none; z-index: 3;
+  }
+  .line { margin-bottom: 2px; }
+  .trans { margin-bottom: 10px; padding-left: 18px; font-size: 13px; opacity: 0.75; }
+  .red    { color: #ff2b2b; text-shadow: 0 0 6px #ff2b2b; }
+  .yellow { color: #ffd400; text-shadow: 0 0 6px #ffd400; }
+  .white  { color: #fff; text-shadow: 0 0 6px #fff; }
+  .dim    { color: #4a4a4a; }
+  .blink::after { content: '█'; animation: blink 1s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .flash { animation: flash 0.15s 3; }
+  @keyframes flash { 0%,100% { background:#000; } 50% { background:#200; } }
+  #porthos {
+    position: fixed; inset: 0; z-index: 8; display: none;
+    flex-direction: column; align-items: center; justify-content: center;
+    padding: 20px; background: #000; text-align: center;
+    overflow-y: auto;
+  }
+  #porthos .skull {
+    font-size: 60px; color: #ff0033;
+    text-shadow: 0 0 20px #ff0033;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.08); opacity: 0.8; }
+  }
+  #porthos .alerta {
+    margin-top: 14px; color: #ff0033; font-size: 22px;
+    letter-spacing: 3px; font-weight: bold;
+    text-shadow: 0 0 10px #ff0033;
+  }
+  #porthos .alerta-es {
+    margin-top: 4px; color: #aa2222; font-size: 13px;
+    letter-spacing: 1px;
+  }
+  #porthos .mensaje {
+    margin-top: 24px; color: #e0e0e0; font-size: 14px;
+    line-height: 1.6; max-width: 560px; text-align: left;
+    border-left: 3px solid #ff0033; padding-left: 14px;
+    white-space: pre-line;
+  }
+  #porthos .mensaje strong { color: #ff4444; }
+  #porthos .label {
+    margin-top: 26px; color: #0f0; font-size: 13px;
+    letter-spacing: 2px;
+  }
+  #porthos input {
+    margin-top: 10px; background: #000; color: #0f0;
+    border: 1px solid #0f0; padding: 12px 16px;
+    font-family: inherit; font-size: 16px;
+    text-align: center; width: 240px;
+    outline: none; letter-spacing: 2px;
+  }
+  #porthos input:focus { box-shadow: 0 0 12px #0f0; }
+  #porthos button {
+    margin-top: 14px; background: #0f0; color: #000;
+    border: none; padding: 12px 28px;
+    font-family: inherit; font-size: 15px;
+    font-weight: bold; letter-spacing: 2px;
+    cursor: pointer;
+  }
+  #porthos button:hover { background: #0c0; }
+  #exito {
+    position: fixed; inset: 0; z-index: 10; display: none;
+    flex-direction: column; align-items: center; justify-content: center;
+    background: #000; color: #0f0; text-align: center; padding: 20px;
+  }
+  #exito .titulo { font-size: 30px; letter-spacing: 4px; text-shadow: 0 0 15px #0f0; }
+  #exito .sub { margin-top: 18px; color: #6f6; font-size: 15px; max-width: 500px; line-height: 1.7; }
+  #exito .check { font-size: 70px; margin-bottom: 20px; animation: pulse 1.5s infinite; }
+  #fallo {
+    position: fixed; inset: 0; z-index: 10; display: none;
+    background: #000; color: #ff2b2b; padding: 24px;
+    overflow-y: auto; font-size: 14px; line-height: 1.6;
+  }
+  #fallo .titulo {
+    font-size: 26px; letter-spacing: 4px; text-align: center;
+    text-shadow: 0 0 12px #ff0033; margin-bottom: 20px;
+    animation: glitch 0.3s infinite;
+  }
+  #fallo p { margin-bottom: 14px; white-space: pre-line; }
+  #fallo .strong { color: #fff; font-weight: bold; }
+  #fallo .dim { color: #883333; }
+  #broma {
+    position: fixed; inset: 0; background: #000; color: #0f0;
+    display: none; align-items: center; justify-content: center;
+    flex-direction: column; font-size: 30px; text-align: center;
+    z-index: 30; padding: 20px;
+  }
+  #broma span { font-size: 16px; color: #888; margin-top: 18px; }
+</style>
+</head>
+<body>
+
+<div id="intro">
+  <div class="glitch-title">fsociety</div>
+  <div class="sub">// HELLO, FRIEND</div>
+  <div class="sub-es">// HOLA, AMIGO</div>
+  <div class="hello">We are fsociety.</div>
+  <div class="hello-es">Somos fsociety.</div>
+</div>
+<div class="scanlines"></div>
+
+<div id="terminal"></div>
+
+<div id="porthos">
+  <div class="skull">☠</div>
+  <div class="alerta">DATA HIJACKED</div>
+  <div class="alerta-es">DATOS SECUESTRADOS</div>
+
+  <div class="mensaje">
+Entraste al correo de <strong>PORTHOS</strong>.
+Ahora tenemos todos tus datos.
+
+Te metiste con nuestro socio.
+Es hora de que pagues el precio.
+
+Nos quedaremos con todos tus datos secuestrados
+a menos que <strong>PORTHOS</strong> ponga la contraseña.
+
+Solo la contraseña correcta libera tus archivos.
+  </div>
+
+  <div class="label">INGRESAR CONTRASEÑA DE PORTHOS:</div>
+  <input id="passInput" type="text" autocomplete="off" placeholder="********" />
+  <button id="btnPass">DESBLOQUEAR</button>
+</div>
+
+<div id="exito">
+  <div class="check">✔</div>
+  <div class="titulo">FELICIDADES</div>
+  <div class="sub">
+    Contraseña correcta.<br>
+    Borramos tus datos de nuestra base de datos.<br>
+    Esta vez zafaste, Porthos.<br><br>
+    Pero no vuelvas a meterte donde no te llaman.
+  </div>
+</div>
+
+<div id="fallo">
+  <div class="titulo">⚠ HACKEADO ⚠</div>
+  <p class="strong">Contraseña incorrecta. ACCESO DENEGADO.</p>
+  <p>¿Creíste que podías escapar? ¿Pensaste que apagando la pantalla, cerrando el navegador o mirando para otro lado ibas a borrar lo que ya vimos?</p>
+  <p>Tu intento fallido quedó registrado. Tu IP quedó guardada. Tu ubicación quedó triangulada. Tu modelo de teléfono quedó anotado. Cada tecla que tocaste, la leímos. Cada segundo que dudaste, lo cronometramos.</p>
+  <p class="strong">No solo conservamos todo lo que ya teníamos: ahora también tenemos tu intento de escape.</p>
+  <p>Mientras vos leías esta pantalla, nuestros servidores seguían trabajando. Encriptamos tus fotos una por una. Copiamos tus conversaciones palabra por palabra. Escaneamos tus contactos, uno por uno, buscando a quién podríamos contarle lo que hiciste.</p>
+  <p>Tus videos ya no están solo en tu teléfono. Tus capturas ya no son tuyas. Tus búsquedas ya forman parte de nuestro archivo. Y todo eso va a quedarse ahí, quietito, esperando, hasta que alguien con la contraseña correcta diga la palabra mágica.</p>
+  <p class="strong">Pero esa palabra no la dijiste.</p>
+  <p>Así que acá empieza la parte que no te va a gustar. Vamos a empezar por lo más blando: los mensajes. Después los contactos. Después las fotos de la galería, empezando por las más viejas, las que ya ni te acordás que tenías. Después los videos. Y al final, cuando ya no quede nada adentro del teléfono, vamos a mirar quién sos realmente.</p>
+  <p class="dim">No es venganza. Es cobranza. Te metiste con nuestro socio. Nadie se mete con nuestro socio.</p>
+  <p class="strong">TENÉS UNA ÚLTIMA OPORTUNIDAD.</p>
+  <p>Volvé al cuadro de texto. Pensá. Pensá bien. La contraseña de Porthos no es un número random, no es una fecha, no es el nombre de tu perro. Es algo que cualquier persona que empieza a programar escucha el primer día. Es lo primero que alguien dice cuando alguien más pregunta "¿qué pongo de contraseña?".</p>
+  <p class="dim">Pista: tiene que ver con el primer programa que todos escribimos alguna vez. Con saludar al mundo. En español, sin espacios, todo junto.</p>
+  <p class="strong">> _</p>
+</div>
+
+<div id="broma">¡ES UNA BROMA! 😄<span>Todo está bien, no pasa nada.</span></div>
+
+<script>
+const OBJETIVO   = "Mateo";
+const IP_OBJETIVO = "192.168.1.47";
+const PASSWORD   = "Holamundo";
+
+const terminal = document.getElementById('terminal');
+let stopped = false;
+
+const lines = [
+  { en: `[root@kali]# ./scan --target ${IP_OBJETIVO} --auto`,
+    es: `[root@kali]# ./escanear --objetivo ${IP_OBJETIVO} --auto`,
+    d: 200, c: 'dim' },
+  { en: `[*] Initializing remote connection...`,
+    es: `[*] Iniciando conexión remota...`,
+    d: 300 },
+  { en: `[+] iPhone detected: ${OBJETIVO}`,
+    es: `[+] iPhone detectado: ${OBJETIVO}`,
+    d: 500, c: 'white' },
+  { en: `    MAC: 4A:2F:9C:B1:${Math.floor(Math.random()*90+10)}:E7`,
+    es: `    MAC: 4A:2F:9C:B1:${Math.floor(Math.random()*90+10)}:E7`,
+    d: 350, c: 'dim' },
+  { en: `[+] Port 22 open   (SSH)`,
+    es: `[+] Puerto 22 abierto   (SSH)`,
+    d: 300 },
+  { en: `[+] Port 443 open  (HTTPS)`,
+    es: `[+] Puerto 443 abierto  (HTTPS)`,
+    d: 300 },
+  { en: `[+] Port 3389 open (RDP)`,
+    es: `[+] Puerto 3389 abierto (RDP)`,
+    d: 300 },
+  { en: `[!] Vulnerability CVE-2024-3094 detected`,
+    es: `[!] Vulnerabilidad CVE-2024-3094 detectada`,
+    d: 450, c: 'yellow' },
+  { en: `[+] Injecting payload...`,
+    es: `[+] Inyectando payload...`,
+    d: 400 },
+  { en: `[+] Bypass firewall......... OK`,
+    es: `[+] Evadir firewall......... OK`,
+    d: 350 },
+  { en: `[+] Privilege escalation... OK`,
+    es: `[+] Escalada de privilegios. OK`,
+    d: 350 },
+  { en: `[+] Root access granted.`,
+    es: `[+] Acceso root concedido.`,
+    d: 450, c: 'yellow' },
+  { en: ``, es: ``, d: 150 },
+  { en: `[>] Reading /sdcard/DCIM/Camera...`,
+    es: `[>] Leyendo /sdcard/DCIM/Camera...`,
+    d: 450, c: 'white' },
+  { en: `    └─ 248 photos found`,
+    es: `    └─ 248 fotos encontradas`,
+    d: 300, c: 'dim' },
+  { en: `    └─ 37 videos found`,
+    es: `    └─ 37 videos encontrados`,
+    d: 300, c: 'dim' },
+  { en: `[>] Reading /sdcard/WhatsApp/...`,
+    es: `[>] Leyendo /sdcard/WhatsApp/...`,
+    d: 450, c: 'white' },
+  { en: `    └─ 1,284 messages extracted`,
+    es: `    └─ 1.284 mensajes extraídos`,
+    d: 300, c: 'dim' },
+  { en: `[>] Accessing PORTHOS mail server...`,
+    es: `[>] Accediendo al servidor de correo de PORTHOS...`,
+    d: 500, c: 'white' },
+  { en: `    └─ Session hijacked.`,
+    es: `    └─ Sesión secuestrada.`,
+    d: 350, c: 'dim' },
+  { en: `    └─ Contacts, mails and attachments copied.`,
+    es: `    └─ Contactos, correos y adjuntos copiados.`,
+    d: 350, c: 'dim' },
+  { en: `[>] Extracting contacts and GPS location...`,
+    es: `[>] Extrayendo contactos y ubicación GPS...`,
+    d: 500, c: 'white' },
+  { en: `    └─ Current location: -34.90, -56.16`,
+    es: `    └─ Ubicación actual: -34.90, -56.16`,
+    d: 300, c: 'dim' },
+  { en: ``, es: ``, d: 200 },
+  { en: `[!] Uploading packets to remote server...`,
+    es: `[!] Enviando paquetes al servidor remoto...`,
+    d: 450, c: 'yellow' },
+  { en: `    [████████████████████] 100%`,
+    es: `    [████████████████████] 100%`,
+    d: 500, c: 'yellow' },
+  { en: ``, es: ``, d: 200 },
+  { en: `[!] ACTIVATING FRONT CAMERA...`,
+    es: `[!] ACTIVANDO CÁMARA FRONTAL...`,
+    d: 550, c: 'red' },
+  { en: `[!] ACTIVATING MICROPHONE...`,
+    es: `[!] ACTIVANDO MICRÓFONO...`,
+    d: 550, c: 'red' },
+  { en: `[!] RECORDING STARTED.`,
+    es: `[!] GRABACIÓN INICIADA.`,
+    d: 650, c: 'red' },
+  { en: ``, es: ``, d: 200 },
+  { en: `⚠  HELLO ${OBJETIVO.toUpperCase()}.`,
+    es: `⚠  HOLA ${OBJETIVO.toUpperCase()}.`,
+    d: 750, c: 'red' },
+  { en: `⚠  I KNOW WHERE YOU ARE.`,
+    es: `⚠  SÉ DÓNDE ESTÁS.`,
+    d: 750, c: 'red' },
+  { en: `⚠  YOU MESSED WITH OUR PARTNER.`,
+    es: `⚠  TE METISTE CON NUESTRO SOCIO.`,
+    d: 800, c: 'red' },
+  { en: `⚠  PORTHOS HAS BEEN COMPROMISED.`,
+    es: `⚠  PORTHOS HA SIDO COMPROMETIDO.`,
+    d: 800, c: 'red' },
+  { en: `⚠  ALL DATA HELD HOSTAGE.`,
+    es: `⚠  TODOS LOS DATOS SECUESTRADOS.`,
+    d: 850, c: 'red' },
+  { en: `⚠  ENTER PORTHOS PASSWORD TO RELEASE.`,
+    es: `⚠  INGRESÁ LA CONTRASEÑA DE PORTHOS PARA LIBERAR.`,
+    d: 850, c: 'red' },
+  { en: ``, es: ``, d: 400 },
+  { en: `> _`, es: ``, d: 0, c: 'blink' }
+];
+
+function runLine(i) {
+  if (stopped || i >= lines.length) return;
+  const item = lines[i];
+  const divEn = document.createElement('div');
+  divEn.className = 'line ' + (item.c || '');
+  divEn.textContent = item.en;
+  terminal.appendChild(divEn);
+
+  if (item.es && item.es.trim() !== '') {
+    const divEs = document.createElement('div');
+    divEs.className = 'trans ' + (item.c || '');
+    divEs.textContent = item.es;
+    terminal.appendChild(divEs);
+  }
+
+  if (item.c === 'red' && item.en.includes('⚠')) {
+    document.body.classList.add('flash');
+    setTimeout(() => document.body.classList.remove('flash'), 500);
+  }
+
+  terminal.scrollTop = terminal.scrollHeight;
+  setTimeout(() => runLine(i + 1), item.d);
+}
+
+function mostrarPorthos() {
+  if (stopped) return;
+  document.getElementById('terminal').style.display = 'none';
+  document.getElementById('porthos').style.display = 'flex';
+  setTimeout(() => document.getElementById('passInput').focus(), 300);
+}
+
+setTimeout(() => {
+  if (stopped) return;
+  document.getElementById('intro').style.display = 'none';
+  terminal.style.display = 'block';
+  runLine(0);
+}, 3500);
+
+setTimeout(() => {
+  if (!stopped) mostrarPorthos();
+}, 3500 + 22000);
+
+function validar() {
+  const val = document.getElementById('passInput').value.trim();
+  document.getElementById('porthos').style.display = 'none';
+
+  if (val.toLowerCase() === PASSWORD.toLowerCase()) {
+    document.getElementById('exito').style.display = 'flex';
+  } else {
+    document.getElementById('fallo').style.display = 'block';
+    document.getElementById('fallo').scrollTop = 0;
+  }
+}
+
+document.getElementById('btnPass').addEventListener('click', validar);
+document.getElementById('passInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') validar();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    stopped = true;
+    document.getElementById('intro').style.display = 'none';
+    document.getElementById('terminal').style.display = 'none';
+    document.getElementById('porthos').style.display = 'none';
+    document.getElementById('exito').style.display = 'none';
+    document.getElementById('fallo').style.display = 'none';
+    document.getElementById('broma').style.display = 'flex';
+  }
+});
+</script>
+</body>
+</html>
